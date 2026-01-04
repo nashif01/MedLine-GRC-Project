@@ -1,0 +1,348 @@
+MEDLINE URGENT CARE CLINIC
+====================================================================
+SECURITY+ THREAT MODELING REPORT (STRIDE + ATTACK PATHS)
+Prepared by: I. Nashif
+Version 1.0
+====================================================================
+
+1. OBJECTIVE
+--------------------------------------------------------------------
+The MedLine Threat Model is designed to identify, analyze, and 
+prioritize attack paths targeting PHI, clinical systems, sensitive 
+user information, and MedLine’s operational continuity. This Threat 
+Model maps threats to control requirements, identifies vulnerabilities 
+across MedLine’s hybrid environment, and provides actionable 
+recommendations to reduce HIPAA-related risks, protect PHI, and 
+strengthen MedLine’s cybersecurity posture.
+
+This model uses STRIDE (Spoofing, Tampering, Repudiation, Information 
+Disclosure, Denial of Service, Elevation of Privilege) combined with 
+Attack Path Modeling to create realistic adversary scenarios.
+
+
+2. SCOPE
+--------------------------------------------------------------------
+This Threat Model covers all MedLine systems, data flows, workflows, 
+and vendors that store, process, or transmit PHI, including:
+
+- Cloud-based Electronic Health Records (EHR)
+- Local server and integration components
+- Workstations and laptops (Windows 10)
+- Staff Wi-Fi and Guest Wi-Fi networks
+- Medical and IoT devices (EKG, vitals monitors, imaging systems)
+- Microsoft 365 services (email, identities)
+- VPN remote access
+- All third-party vendors (EHR, billing, labs, imaging, IT support)
+- Backup infrastructure and disaster recovery paths
+
+No PHI-bearing system is excluded from this model.
+
+
+3. SYSTEM OVERVIEW (TARGET OF EVALUATION)
+--------------------------------------------------------------------
+
+3.1 Hybrid EHR Architecture
+MedLine uses a hybrid EHR model:  
+- Primary PHI storage is hosted in a cloud EHR platform.  
+- Local servers facilitate device integration, data caching, and 
+  offline workflows.  
+- Staff access the EHR via secure browser sessions protected by MFA.
+
+3.2 Network Architecture
+MedLine uses a segmented network design:
+- Staff VLAN for clinical and administrative workstations
+- IoT VLAN for medical devices
+- Guest VLAN for patients and visitors
+- Firewall rules limit traffic between the VLANs
+- Local integration server bridges IoT → EHR workflows
+
+3.3 Medical / IoT Devices
+Common devices include:
+- EKG and vitals monitors
+- Digital X-ray imaging equipment
+- ECG and BP devices
+- Diagnostic analyzers
+Devices reside on the IoT VLAN and send data to local servers before 
+uploading to the EHR.
+
+3.4 Staff Workstations & Access Controls
+- Windows 10 laptops and workstations
+- MFA-protected EHR login (browser-based)
+- VPN + MFA for remote access
+- RBAC enforces minimum necessary access
+- Temporary PHI cache may exist during printing or form generation
+
+3.5 Vendor Ecosystem
+Vendors with PHI exposure:
+- Cloud EHR Vendor (full PHI)
+- Billing Vendor (claims data)
+- Labs Vendor (orders + results)
+- Imaging Vendor
+- Managed IT provider
+- Medical device vendors (firmware updates, support)
+
+All vendors operate under BAAs and undergo risk assessment.
+
+
+4. DATA FLOW DIAGRAM (DFD) SUMMARY
+--------------------------------------------------------------------
+
+4.1 PHI Creation
+PHI is first created at:
+- Reception workstation (patient demographics, insurance)
+
+4.2 PHI Expansion
+During clinical encounters, nurses and physicians add:
+- Vitals, medical history, notes
+- Labs, imaging orders
+- Prescriptions, visit summaries
+
+IoT devices transmit clinical data → Local Server → Cloud EHR.
+
+4.3 PHI Storage Locations
+- Cloud EHR (primary)
+- Local server (temporary)
+- IoT devices (temporary)
+- Workstations (cache/temporary files)
+- Encrypted backups (offsite cloud storage)
+
+4.4 PHI Shared with Vendors
+PHI flows to:
+- Billing Vendor (insurance, claims)
+- Labs Vendor (orders, results)
+- Imaging Vendor
+- EHR vendor (primary storage)
+- Managed IT (incidental exposure)
+
+4.5 Internal PHI Communication
+- Secure messaging within EHR
+- Encrypted email via Microsoft 365
+- No PHI over unencrypted channels
+
+DFD Key Boundaries:
+- Staff VLAN → Cloud EHR
+- IoT VLAN → Local Server → Staff VLAN
+- Staff VLAN → Vendors (API)
+- Staff → VPN → Internal Systems
+
+
+5. STRIDE THREAT ENUMERATION (ALL ASSETS)
+--------------------------------------------------------------------
+Below is the full set of STRIDE threats across all critical assets.
+
+5.1 Staff Workstations & Authentication
+
+---- Spoofing ----
+- Phishing-based credential theft
+- MFA fatigue attacks
+- Session cookie theft / replay
+- VPN impersonation
+- Unlocked workstation compromises
+- Password reuse across systems
+- Fake IT support impersonation
+
+---- Tampering ----
+- Malware modifying system files
+- Ransomware encryption
+- Man-in-the-middle altering data
+- Unauthorized PHI modification
+- VPN profile tampering
+- Malicious browser extensions
+- Insider modification of PHI
+
+---- Repudiation ----
+- Log deletion
+- Weak workstation audit logs
+- EHR logs disabled or malformed
+- VPN log gaps
+- Use of shared accounts
+- Anti-forensics tools
+
+---- Information Disclosure ----
+- PHI exposure from phishing
+- Wi-Fi packet sniffing
+- Keyloggers and screen capture malware
+- Unauthorized email forwarding
+- Accidental unencrypted email
+- Cached PHI theft
+- USB-based exfiltration
+- Session hijacking
+- Shoulder surfing
+- Credential autofill exposure
+
+---- Denial of Service ----
+- Ransomware lockout
+- Malware resource exhaustion
+- Disk/log overflow
+- Network adapter disabling
+- MFA/VPN availability attacks
+- Corrupted boot files
+- IoT integration DoS
+- Insider workstation sabotage
+
+---- Elevation of Privilege ----
+- Local privilege escalation exploits
+- LSASS memory dumping
+- USB boot bypass
+- AD misconfigurations
+- VPN client privilege elevations
+- Remote support tool abuse
+- EHR RBAC misconfiguration
+- Insider privilege abuse
+- Pass-the-Hash attacks
+
+
+5.2 Wi-Fi Networks (Staff & Guest)
+
+---- Spoofing ----
+- Rogue AP impersonation
+- Evil Twin attacks
+- MAC spoofing
+- Captive portal spoofing
+- ARP poisoning attacks
+- IoT device identity spoofing
+- RADIUS/Wi-Fi controller spoofing
+
+---- Tampering ----
+- DNS poisoning
+- SSL stripping
+- Wi-Fi configuration tampering
+- Beacon manipulation
+- DHCP manipulation
+- Traffic injection
+
+---- Repudiation ----
+- No wireless identity logs
+- No device attribution
+- Rogue AP without logs
+- Incomplete RADIUS accounting
+
+---- Information Disclosure ----
+- Sniffing unencrypted traffic
+- Captured WPA2/WPA3 handshakes
+- IoT telemetry interception
+- Session hijacking on Wi-Fi
+- Sniffing EHR login attempts
+- Capturing MFA tokens
+
+---- Denial of Service ----
+- Wi-Fi jamming
+- De-authentication attacks
+- AP overload
+- DHCP starvation
+- Guest network attacks impacting staff
+
+---- Elevation of Privilege ----
+- Guest → Staff VLAN jump
+- Captured AP admin credentials
+- IoT VLAN pivoting
+- BSSID manipulation
+- Firmware-level access elevation
+
+
+5.3 Medical/IoT Devices
+- Outdated firmware exploitation
+- Default credentials abuse
+- PHI leakage via device logs
+- IoT VLAN pivoting
+- Manipulated clinical readings
+- Remote shutdown of devices
+- Compromised update channels
+
+5.4 Vendors
+- Vendor portal phishing
+- API key theft
+- Compromised vendor credentials
+- Supply chain attacks
+- Vendor insider abuse
+- Misconfigured vendor accounts
+- Third-party system breach impacting PHI
+
+
+6. ATTACK PATH MODELING
+--------------------------------------------------------------------
+
+Attack Path 1:
+Phishing → Credential Theft → VPN → EHR → PHI Exfiltration
+- Most common healthcare breach type
+- High impact due to PHI exposure
+
+Attack Path 2:
+Evil Twin Wi-Fi → Session Hijacking → EHR Access
+- Wi-Fi impersonation yields session tokens
+- MFA bypass via token replay
+
+Attack Path 3:
+IoT Exploit → Lateral Movement → Ransomware Deployment
+- Unpatched IoT device → pivot → encryption of workstations
+
+Attack Path 4:
+Vendor Breach → API Abuse → PHI Manipulation or Theft
+- External compromise yields direct access to MedLine data
+
+Attack Path 5:
+Insider Abuse → Privilege Escalation → PHI Alteration
+- Insider modifies data undetected if logging is weak
+
+
+7. RISK PRIORITIZATION
+--------------------------------------------------------------------
+
+High-Risk Categories:
+- Credential phishing
+- IoT pivot → ransomware
+- Evil Twin + MITM attack
+- Vendor API compromise
+- Insider escalation (privileged roles)
+
+Moderate-Risk Categories:
+- Session hijacking
+- Log repudiation
+- Device firmware exploitation
+- Wi-Fi misconfiguration
+
+Low-Risk Categories:
+- Shoulder surfing
+- Basic workstation misconfigurations
+
+
+8. RECOMMENDED MITIGATIONS
+--------------------------------------------------------------------
+
+Administrative:
+- Quarterly security training
+- Phishing simulation program
+- Vendor risk assessments
+- RBAC reviews
+- Incident reporting reinforcement
+
+Technical:
+- MFA everywhere
+- EDR + SIEM integration
+- DNS filtering + web isolation
+- WPA3 Enterprise Wi-Fi
+- Network segmentation improvements
+- Zero Trust Network Architecture adoption
+- API monitoring and logging
+- IoT firmware patching
+- USB port control
+
+Physical:
+- Screen privacy filters
+- Locked server closets
+- Secure workstation placement
+
+
+9. CONCLUSION
+--------------------------------------------------------------------
+The MedLine Security+ Threat Model identifies a wide range of threats 
+impacting PHI confidentiality, integrity, and availability. Key attack 
+paths include phishing, Wi-Fi spoofing, IoT exploits, ransomware, and 
+vendor compromise. By implementing the recommended technical, 
+administrative, and physical controls, MedLine can significantly reduce 
+its HIPAA exposure, strengthen defenses, and enhance clinical 
+operational resilience.
+
+====================================================================
+END OF REPORT
+====================================================================
