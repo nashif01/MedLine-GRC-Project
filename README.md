@@ -26,5 +26,5 @@ The project demonstrates healthcare security design across:
 
 ## Author
 Ibraheem Nashif  
-(Link to Ghost blog)  
-(Link to LinkedIn)
+ibraheem-nashif.ghost.io 
+www.linkedin.com/in/ibraheem-nashif-964516250
