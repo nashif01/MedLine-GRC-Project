@@ -1,0 +1,328 @@
+MEDLINE URGENT CARE CLINIC
+===========================================================
+FULL SECURITY POLICY SUITE — COMPLETE & COMPREHENSIVE VERSION
+===========================================================
+
+This file contains *all seven MedLine Security Policies* in full detail:
+
+1. Acceptable Use Policy (AUP)
+2. Password & Authentication Policy
+3. Access Control Policy
+4. Incident Response Policy (IR)
+5. Data Protection & Encryption Policy (DPE)
+6. Vendor Risk Management Policy (VRM)
+7. Backup & Disaster Recovery Policy (BDR)
+
+Each includes:
+- Purpose  
+- Scope  
+- Definitions  
+- Full Requirements  
+- Roles & Responsibilities  
+- Compliance & Enforcement  
+- Exceptions  
+- Revision History  
+
+===========================================================
+01. ACCEPTABLE USE POLICY (AUP)
+===========================================================
+
+PURPOSE:
+The Acceptable Use Policy ensures all MedLine workforce members use systems, networks, devices, applications, and PHI appropriately, securely, and in compliance with HIPAA.
+
+SCOPE:
+Applies to all employees, contractors, temps, volunteers, interns, and third parties with access to MedLine systems, networks, data, or facilities.
+
+DEFINITIONS:
+PHI: Protected Health Information  
+Authorized Use: Actions required for job duties  
+System: Any MedLine-owned device, network, cloud service, or application
+
+REQUIREMENTS:
+- Systems used only for authorized job duties.  
+- PHI confidentiality must be maintained at all times.  
+- Passwords cannot be shared with anyone.  
+- Only authorized software may be installed.  
+- Attempts to bypass any security control are treated as intrusions.  
+- Personal devices prohibited from personnel networks.  
+- All PHI must be protected; transmission must be encrypted.  
+- MFA required for all accounts.  
+- Screens lock after 15 seconds of inactivity.  
+- Use only approved clinic WiFi for business purposes.  
+- PHI cannot be emailed, texted, or transmitted via unencrypted channels.
+
+ROLES & RESPONSIBILITIES:
+Workforce must follow all usage rules.  
+IT enforces controls.  
+Compliance monitors HIPAA adherence.  
+Leadership ensures enforcement.
+
+COMPLIANCE & ENFORCEMENT:
+Violations result in disciplinary action up to termination and possible HIPAA penalties.
+
+EXCEPTIONS:
+Only with written approval from Executive Leadership & Compliance.
+
+REVISION HISTORY:
+Version 1.0 — Initial Release.
+
+===========================================================
+02. PASSWORD & AUTHENTICATION POLICY
+===========================================================
+
+PURPOSE:
+To ensure strong authentication controls that prevent unauthorized access to PHI and critical systems.
+
+SCOPE:
+Applies to all MedLine users, systems, applications, and administrators.
+
+DEFINITIONS:
+MFA: Multi-Factor Authentication  
+Privileged User: Elevated access account  
+Lockout: Automatic account disablement after failed attempts
+
+REQUIREMENTS:
+- Complex passwords required; minimum 12 characters.  
+- Must include uppercase, lowercase, numbers, symbols.  
+- Password rotation every 60 days; privileged accounts every 30 days.  
+- MFA required for all users.  
+- Accounts lock after 2 failed attempts.  
+- No shared accounts permitted.  
+- Access removed immediately upon termination.
+
+ROLES & RESPONSIBILITIES:
+Users maintain password secrecy.  
+IT enforces authentication controls.  
+Compliance ensures HIPAA alignment.
+
+COMPLIANCE & ENFORCEMENT:
+Failure to comply may result in corrective action, loss of access, or termination.
+
+EXCEPTIONS:
+Only with Compliance approval.
+
+REVISION HISTORY:
+Version 1.0.
+
+===========================================================
+03. ACCESS CONTROL POLICY
+===========================================================
+
+PURPOSE:
+To restrict access to PHI and critical systems using Role-Based Access Control (RBAC) and HIPAA Minimum Necessary Standard.
+
+SCOPE:
+All users, devices, systems, networks, and vendors.
+
+DEFINITIONS:
+Minimum Necessary Standard: HIPAA requirement limiting PHI access.  
+RBAC: Role-Based Access Control.
+
+REQUIREMENTS:
+- Access must align with job duties.  
+- Minimum necessary enforced at all times.  
+- Privileged access requires IT + Compliance approval.  
+- Quarterly access reviews required.  
+- Immediate removal of access upon termination or reassignment.  
+- Shared accounts prohibited.  
+- Vendors given strictly limited access.
+
+ROLES & RESPONSIBILITIES:
+Workforce uses only authorized access.  
+IT manages access provisioning.  
+Compliance oversees HIPAA alignment.  
+Leadership supports enforcement.
+
+COMPLIANCE & ENFORCEMENT:
+Violations result in disciplinary measures.
+
+EXCEPTIONS:
+Only with Executive + Compliance approval.
+
+REVISION HISTORY:
+Version 1.0.
+
+===========================================================
+04. INCIDENT RESPONSE POLICY (IR)
+===========================================================
+
+PURPOSE:
+To detect, respond to, contain, eradicate, and recover from security incidents, ensuring PHI protection and HIPAA compliance.
+
+SCOPE:
+All PHI, systems, networks, cloud platforms, internal servers, and personnel.
+
+DEFINITIONS:
+Security Incident: Unauthorized access or threat.  
+Breach: Unauthorized PHI disclosure.  
+IR Team: Group handling incidents.  
+Containment/Eradication/Recovery: NIST IR lifecycles.
+
+REQUIREMENTS:
+- Staff must report incidents immediately.  
+- IT validates alerts and investigates.  
+- IR Team leads containment and recovery.  
+- HIPAA breach evaluation mandatory.  
+- Full documentation required for all incidents.  
+- NIST IR Lifecycle followed (Prep, ID, Contain, Eradicate, Recover, Lessons Learned).  
+- No tampering with logs or evidence.  
+- Only approved communication channels permitted.
+
+ROLES & RESPONSIBILITIES:
+Workforce: Report incidents immediately.  
+IT: Investigate, contain, recover.  
+Compliance: Breach determination + regulatory reporting.  
+Leadership: Oversight and escalation.  
+Vendors: Must report incidents involving MedLine data.
+
+COMPLIANCE & ENFORCEMENT:
+Failure to report incidents results in disciplinary action up to termination.
+
+EXCEPTIONS:
+Only with Executive + Compliance approval.
+
+REVISION HISTORY:
+Version 1.0.
+
+===========================================================
+05. DATA PROTECTION & ENCRYPTION POLICY
+===========================================================
+
+PURPOSE:
+To ensure PHI and sensitive data are encrypted, protected, and handled securely per HIPAA Security Rule.
+
+SCOPE:
+All systems, personnel, devices, cloud platforms, backups, and PHI-handling processes.
+
+DEFINITIONS:
+Encryption at Rest / In Transit  
+Minimum Necessary Standard  
+Data Breach  
+Data Custodian  
+De-identification
+
+REQUIREMENTS:
+- PHI encrypted at rest and in transit using FIPS 140-2.  
+- No PHI may be stored locally without approval.  
+- Only approved HIPAA-compliant cloud environments allowed.  
+- Secure deletion required.  
+- PHI cannot be transmitted through unapproved channels.  
+- Logs must be protected, monitored, tamper-evident.  
+- Vendors must follow encryption standards.
+
+ROLES & RESPONSIBILITIES:
+Workforce: Protect PHI.  
+IT: Enforce encryption controls.  
+Compliance: Ensure HIPAA alignment.  
+Leadership: Approve exceptions.  
+Vendors: Demonstrate compliance.
+
+COMPLIANCE & ENFORCEMENT:
+Violations may lead to corrective action, HIPAA penalties, or access revocation.
+
+EXCEPTIONS:
+Only with Leadership + Compliance approval, must remain HIPAA-compliant.
+
+REVISION HISTORY:
+Version 1.0.
+
+===========================================================
+06. VENDOR RISK MANAGEMENT POLICY (VRM)
+===========================================================
+
+PURPOSE:
+To ensure vendors handling PHI are secure, HIPAA-compliant, assessed, vetted, monitored, and contractually obligated.
+
+SCOPE:
+All vendors, contractors, cloud platforms, MSPs, consultants, and any outside party with system or data access.
+
+DEFINITIONS:
+Vendor  
+Business Associate (BA)  
+BAA  
+Vendor Risk Assessment  
+Offboarding  
+Critical Vendor
+
+REQUIREMENTS:
+- Vendors must sign a BAA before handling PHI.  
+- Mandatory security assessment before onboarding.  
+- Minimum necessary access enforced.  
+- Continuous monitoring of vendor activity.  
+- Annual vendor security reviews.  
+- Vendors must immediately report breaches.  
+- Unauthorized subcontracting prohibited.  
+- Upon termination, vendors must securely delete or return all data.
+
+ROLES & RESPONSIBILITIES:
+Workforce: Report unapproved vendor activity.  
+Managers: Ensure proper vendor onboarding.  
+IT: Assess vendor systems + monitor access.  
+Compliance: Enforce HIPAA vendor requirements.  
+Leadership: Authorize high-risk vendors.  
+Vendors: Follow all controls and reporting obligations.
+
+COMPLIANCE & ENFORCEMENT:
+Immediate termination for:
+- Security noncompliance  
+- Breach concealment  
+
+EXCEPTIONS:
+Emergency clinical exceptions only, must remain HIPAA-compliant.
+
+REVISION HISTORY:
+Version 1.0.
+
+===========================================================
+07. BACKUP & DISASTER RECOVERY (BDR) POLICY
+===========================================================
+
+PURPOSE:
+To ensure MedLine can maintain continuity of care and restore systems rapidly after outages, cyberattacks, or disasters.
+
+SCOPE:
+All PHI, systems, networks, EHR, backups, DR sites, IT staff, and vendors.
+
+DEFINITIONS:
+Backup  
+Disaster Recovery  
+RTO  
+RPO  
+Failover  
+Replication  
+Backup Integrity
+
+REQUIREMENTS:
+- Daily encrypted backups required.  
+- Onsite + cloud + offsite redundancy mandatory.  
+- Weekly disaster recovery (DR) testing required.  
+- RTO = 4 hours for critical systems.  
+- RPO = 24 hours.  
+- Logs + configurations backed up twice weekly.  
+- Restoration must follow documented process.  
+- Only IT may perform restorations.  
+- Backup integrity verified regularly.
+
+ROLES & RESPONSIBILITIES:
+Workforce: Report outages.  
+IT: Maintain backups, perform DR testing, restore systems.  
+Compliance: Audit and ensure HIPAA availability compliance.  
+Leadership: Ensure resources for DR.  
+Vendors: Must meet DR obligations.
+
+COMPLIANCE & ENFORCEMENT:
+Zero tolerance for:
+- Backup tampering  
+- Missed backups  
+- Backup corruption  
+- Failure to report DR failures  
+
+EXCEPTIONS:
+None permitted.
+
+REVISION HISTORY:
+Version 1.0.
+
+===========================================================
+END OF FULL MEDLINE POLICY SUITE
+===========================================================
