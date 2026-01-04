@@ -1,0 +1,528 @@
+MEDLINE URGENT CARE – RANSOMWARE INCIDENT RESPONSE CASE STUDY
+Author: I. Nashif
+Date: 2025-11-25
+Format: Security+ / SOC 2 / HIPAA-Oriented Incident Response Simulation
+======================================================================
+
+1. OVERVIEW
+-----------
+
+This document is a full incident response walk-through I built around a
+simulated ransomware attack on MedLine Urgent Care Clinic. I treated the
+scenario as if I were the on-call security analyst during an overnight shift,
+using MedLine’s existing Risk Assessment, Incident Response Plan, Vulnerability
+Management Workflow, and Security Policy Suite as the foundation.
+
+The goal of this exercise was:
+
+- To practice end-to-end incident response the way Security+ / SOC 2 / HIPAA
+  expect it to be done.
+- To show how I would think, triage, contain, eradicate, recover, and document
+  a real attack on a healthcare environment that handles PHI.
+- To generate real portfolio evidence: a full, realistic incident narrative,
+  not just bullet points.
+
+The scenario is written from my perspective, in my own words, as if I were
+really on duty that night.
+
+======================================================================
+2. ENVIRONMENT SNAPSHOT
+-----------------------
+
+Organization: MedLine Urgent Care Clinic  
+Regulatory Context: HIPAA, future SOC 2 alignment  
+Key Assets:
+- Cloud EHR with local sync
+- FILESERVER-01 (PHI file server)
+- DC01 (Domain Controller)
+- ADMINPC-02 (IT/infra admin workstation)
+- LABPC-01 (lab workstation tied to clinical devices)
+- FRONTDESK-01 (reception workstation)
+- Multiple IoT / network devices (switches, cameras, APs) on a flat network
+
+Existing documentation (previous projects):
+- Risk Assessment Report
+- Vulnerability Management Workflow (VMW)
+- Incident Response Plan (IRP)
+- Full Security Policy Suite (AUP, Access Control, IR Policy, BDR, VRM, etc.)
+
+High-level known weakness from the risk assessment:
+- Flat network with IoT and clinical devices mingled together
+- Limited segmentation
+- Heavy reliance on a few privileged accounts
+- IoT devices not consistently hardened
+
+======================================================================
+3. INCIDENT SUMMARY
+-------------------
+
+Incident ID: IR-2025-113  
+Type: Ransomware (Ryuk-like behavior)  
+Impact: PHI encrypted on FILESERVER-01, temporary EHR outage  
+Status: Contained, eradicated, restored from clean backups  
+Regulatory: HIPAA breach triggered (encryption of PHI)
+
+Short version of what happened:
+
+- A receptionist opened a phishing email spoofed as “Quest Diagnostics” and
+  launched a malicious macro-enabled Excel file.
+- The macro attempted to run PowerShell, dump credentials, and move laterally.
+- The attacker gained a foothold through an IoT switch with default
+  credentials, then used that to pivot into the internal network.
+- Multiple systems were impacted: FILESERVER-01, ADMINPC-02, LABPC-01.
+- A ransomware note appeared, threatening to leak PHI.
+- I treated it as a CRITICAL incident, shut down network segments, locked down
+  privileged accounts, purged Kerberos tickets, disabled PowerShell and logon
+  scripts, engaged an MSP for forensics, and activated clinical downtime
+  procedures.
+- Backups were clean, so I restored FILESERVER-01 and supporting services
+  into a hardened, isolated VLAN, validated integrity, then staged a careful
+  reconnection back into production.
+- No evidence of data exfiltration was found. PHI was encrypted but ultimately
+  restored from clean backups.
+
+======================================================================
+4. DETAILED TIMELINE (MY DECISIONS AND RATIONALE)
+-------------------------------------------------
+
+Times are approximate and in local time.
+
+02:12 – First Alert: Suspicious Email
+-------------------------------------
+
+The SIEM flagged an email to receptionist@medline.local:
+
+  Subject: "URGENT: Updated Lab Results - Quest Diagnostics"
+  Attachment: Results_Update.xlsm
+  URL: hxxp://questsecure-labs.com/result
+
+At this point nothing had technically detonated yet, but this was a classic
+healthcare phishing lure. Rather than wait to see if the user clicked, I
+decided to preemptively protect the workstation.
+
+My first move:
+- Segment and isolate FRONTDESK-01 from the network using EDR’s network
+  isolation feature.
+
+02:13 – Macro Detonates As I Isolate the Host
+---------------------------------------------
+
+Right as the isolation took effect, the EDR reported:
+
+- excel.exe spawning powershell.exe
+- PowerShell attempting to download from a suspicious IP
+- LSASS access attempt denied
+
+The good news: network isolation blocked the outbound connection.
+The bad news: the receptionist had already opened the attachment.
+
+The receptionist called and said her computer froze right after she opened
+a Quest email. That confirmed the user action.
+
+Almost immediately, SIEM logs showed authentication failures from
+FRONTDESK-01 toward FILESERVER-01 using the medline_admin account. That
+told me the macro was likely trying to brute-force or abuse credentials to
+reach the file server.
+
+My next moves:
+- Disable the medline_admin privileged account in AD.
+- Pull logs from both FRONTDESK-01 and FILESERVER-01.
+- Isolate FILESERVER-01 as well, even though I knew it would disrupt EHR.
+
+02:14 – Ransomware Activity Begins
+----------------------------------
+
+The logs showed multiple failed attempts followed by a successful logon to
+FILESERVER-01 using medline_admin, but from an IP that did not belong to
+FRONTDESK-01. That IP (10.0.4.77) resolved to a Ubiquiti switch (USW-Floor1)
+on the IoT/clinical network.
+
+So the path was:
+- Phishing → receptionist
+- Macro → credential harvesting attempts
+- IoT switch with default credentials → used as pivot
+- Pivot → FILESERVER-01
+
+Right around this time, the SIEM flagged:
+
+- A mass file rename / encryption pattern on FILESERVER-01
+- Files changing to a .ryk extension
+
+Nursing staff called saying the EHR was “frozen” and charts weren’t loading.
+
+My interpretation:
+- Ransomware detonation had begun.
+- PHI was being encrypted.
+- This was now a potential HIPAA breach.
+
+My immediate response:
+- Treat it as a high-to-critical severity event.
+- Isolate additional endpoints that showed encryption or suspicious activity
+  (ADMINPC-02, LABPC-01, etc.).
+- Accept short-term clinical disruption to prevent total compromise.
+
+02:15 – Critical Incident Declared
+----------------------------------
+
+At this point, a ransom note appeared on FILESERVER-01:
+
+  "Your files are encrypted. We are Ryuk. Pay 24 BTC or PHI will be leaked."
+
+That confirmed:
+
+- Ransomware.
+- PHI impact.
+- Threat to confidentiality (not just availability).
+
+I escalated:
+
+- Declared a CRITICAL INCIDENT under MedLine’s IRP.
+- Paged Executive Leadership, IT Lead, Privacy Officer, Compliance, and the
+  outsourced MSP/SOC.
+- Classified it as a PHI-impacting ransomware event.
+
+Simultaneously, I:
+
+- Isolated ADMINPC-02 and attempted isolation for LABPC-01.
+- Tried to push a shutdown/lockdown to the compromised switch, but it
+  ignored controller commands, another sign of deep compromise.
+
+02:16–02:18 – Network-Level Containment
+---------------------------------------
+
+To stop lateral movement, I made a conscious trade-off: I took down large
+chunks of the network.
+
+My decisions:
+
+1) Shut down the entire Clinical VLAN (10.0.4.0/24):
+   - This dropped all clinical workstations and devices.
+   - It also cut off the attacker’s main movement path.
+
+2) Lock down the IoT VLAN:
+   - Blocked all IoT -> LAN communication.
+   - Blocked IoT -> Internet.
+   - Cameras, smart devices, and some medical middleware went dark, but that
+     was preferable to giving the attacker more pivot points.
+
+3) Engage the MSP formally:
+   - Called the on-call IR team.
+   - Requested immediate memory imaging and forensic capture on infected
+     systems: FILESERVER-01, ADMINPC-02, LABPC-01.
+   - Agreed not to reboot infected hosts.
+
+4) Confirmed with the Privacy Officer that PHI was indeed encrypted, and that
+   we needed to treat this as a HIPAA breach and start documentation.
+
+Later, I locked down the Admin VLAN as well after seeing the attacker try to
+hit an admin IP (10.0.6.14). That effectively sealed all critical segments:
+Clinical, IoT, Admin.
+
+02:18–02:22 – Domain and Credential Lockdown
+---------------------------------------------
+
+At this point, the attacker had lost most lateral movement but was still
+probing AD and trying to modify GPOs.
+
+I decided to go hard on Active Directory:
+
+- Disabled every privileged account in the Domain Admins group except for my
+  own IR account and IT Lead.
+- Performed a Kerberos ticket purge across the environment, including a
+  krbtgt reset. This invalidated any stolen TGT/TGS or Golden Ticket attempt.
+- Pushed an emergency GPO that:
+  - Disabled PowerShell execution domain-wide.
+  - Disabled all logon scripts and startup scripts that could be abused.
+
+Effectively, I stripped the attacker of:
+- Privileged credentials (by disabling accounts and resetting passwords).
+- Stored tickets (by purging Kerberos).
+- Common execution mechanisms (by disabling PowerShell and scripts).
+
+Meanwhile, the MSP confirmed that attempts to copy LSASS dumps off the DC
+had failed. My lockdown had come in time.
+
+02:20–02:25 – Forensics, Backup Validation, Clinical Downtime
+-------------------------------------------------------------
+
+While containment was happening, I also focused on:
+
+- Activating clinical downtime procedures: I told leadership we had to switch
+  to paper charting. The Clinical Lead acknowledged and moved staff to
+  downtime binders. That preserved patient safety and HIPAA’s availability
+  requirement.
+
+- Checking backup integrity: I had the backup system verify the last good
+  snapshots of FILESERVER-01, ADMINPC-02, and LABPC-01. Backups from 01:00 AM
+  appeared clean with no ransomware markers.
+
+- Working with the MSP to:
+  - Image infected hosts.
+  - Capture RAM, MFT, registry hives, and relevant logs.
+  - Hunt for persistence mechanisms: WMI event subscriptions, scheduled
+    tasks, rogue local admin accounts, malicious services, etc.
+
+They found:
+- A WMI subscription on ADMINPC-02.
+- A fake "WindowsHealthCheck" scheduled task on LABPC-01.
+- A rogue local admin account "support-admin" on FRONTDESK-01.
+
+I documented everything and provided a preliminary timeline to the
+Privacy Officer to support the HIPAA breach assessment.
+
+02:23–02:25 – Eradication of Persistence
+----------------------------------------
+
+Once lateral movement was cut and evidence captured, I green-lit targeted
+eradication:
+
+- Removed the malicious WMI event subscription.
+- Deleted the fake scheduled task.
+- Removed the rogue local admin account.
+- Confirmed via MSP that there were no other persistence artifacts across
+  the domain or on other hosts.
+
+I then forced a password reset for all standard user accounts, not just the
+admins. This ensured that any stolen credential the attacker might have
+captured became worthless.
+
+At this point:
+- All segments that mattered were locked down.
+- Privileged accounts were disabled.
+- Tickets were purged.
+- Persistence was eradicated.
+- Clinical operations were functioning on paper.
+- Backups were known good.
+- The attacker was stuck outside, hammering the firewall but unable to move
+  inside.
+
+02:25–02:27 – Root Cause and Malware Analysis
+---------------------------------------------
+
+The MSP pinpointed the detonator on FILESERVER-01:
+
+- A scheduled task called MedicalSyncServiceUpdate calling a file:
+  svc_updater.exe, which turned out to be the ransomware dropper.
+
+We quarantined svc_updater.exe, calculated its hash, and collected it for
+analysis. I then submitted the hash and IOCs to CISA, treating this like a
+real healthcare sector event.
+
+We also dumped firmware logs from the compromised IoT switch and confirmed
+root cause: default credentials on the switch had been abused as a pivot.
+
+02:27–02:31 – Restoration Planning and AD Hardening
+---------------------------------------------------
+
+Before restoring anything, I:
+
+- Verified restored PHI integrity from the backup snapshot (file sampling,
+  shadow copy comparison, metadata checks).
+- Built an AD hardening checklist:
+  - Only two admin accounts enabled, each with MFA.
+  - Kerberos hardened (krbtgt reset, AES-only, second reset scheduled).
+  - GPO enforcing restricted PowerShell and SMB signing.
+  - Segmented VLAN design for restore and production.
+  - EDR baselines updated with the new ransomware IOCs.
+
+I then:
+
+- Restored FILESERVER-01 from the 01:00 AM backup into an isolated Restore
+  VLAN.
+- Restored the EHR backend similarly into the Restore VLAN.
+- Verified both were clean with EDR, log inspection, and internal testing.
+
+02:31–02:35 – Staged Recovery and Reintegration
+-----------------------------------------------
+
+I did not just flip the network back on. I staged it:
+
+1) Staged client reconnection:
+   - Picked one known-clean nurse workstation (NURSE-STAT01).
+   - Applied the hardened GPO.
+   - Verified OS updates and security posture.
+   - Connected it to the restored environment and tested EHR and file access.
+   - Monitored for anomalies (none).
+   - Slowly added two more workstations (NURSE-ROOM2, RECEPTION-DESK02),
+     repeating checks.
+
+2) Reconnected FILESERVER-01 back into a hardened Clinical VLAN:
+   - Firewall ACLs allowed only necessary communications (to DC and EHR).
+   - No direct Internet access and no IoT interaction.
+
+3) Reconnected the EHR backend to the clinical network:
+   - EHR came back online.
+   - Staff confirmed patient charts loaded and new visits could be charted.
+
+4) Kept the IoT VLAN offline:
+   - All IoT gear remained isolated pending firmware updates, credential
+     changes, and vendor security hardening.
+
+Once clinical systems were stable and no anomalous behavior appeared in
+logs or EDR, I considered the technical side of the incident closed and
+moved the organization into post-incident review.
+
+======================================================================
+5. IMPACT ASSESSMENT
+--------------------
+
+- PHI was encrypted on FILESERVER-01.
+- EHR was offline for approximately 1 hour.
+- Downtime procedures ensured patient care continued safely.
+- No evidence of PHI exfiltration was found.
+- Multiple hosts were partially or fully encrypted, but all critical data
+  was restored from known-good backups.
+
+From a HIPAA standpoint, this was a PHI-impacting incident because PHI was
+unavailable and subject to unauthorized modification (encryption). Even
+without confirmed exfiltration, the Privacy Officer decided to treat it as
+a breach subject to the Breach Notification Rule, with notifications drafted
+based on my forensic timeline and technical findings.
+
+======================================================================
+6. ROOT CAUSE
+-------------
+
+Technical root cause:
+
+- A phishing email convincing enough to be opened by the receptionist.
+- Lack of controls to prevent macro execution in Office.
+- An IoT switch deployed with default credentials and full network visibility.
+- Flat network architecture that allowed an IoT pivot to reach core systems.
+
+Human/process root cause:
+
+- Inadequate phishing awareness training.
+- Insufficient enforcement of strong configuration standards on IoT devices.
+- Network segmentation not fully aligned with MedLine’s risk profile.
+
+======================================================================
+7. KEY DEFENSIVE ACTIONS (WHAT I ACTUALLY DID)
+----------------------------------------------
+
+The most important things I did in this simulation, as the on-call analyst:
+
+- Isolated the receptionist workstation immediately upon detecting a risky
+  email before waiting for confirmation.
+- Quickly disabled the medline_admin privileged account once I saw it being
+  abused in failed and then successful logins.
+- Isolated FILESERVER-01 as soon as ransomware behavior appeared, accepting
+  the trade-off of short-term clinical disruption.
+- Declared a CRITICAL incident, brought in leadership, Privacy, Compliance,
+  and the MSP early.
+- Shut down entire VLANs (Clinical, IoT, Admin) to prevent lateral movement,
+  prioritizing containment over convenience.
+- Locked down AD by:
+  - Disabling all but two privileged accounts.
+  - Purging Kerberos tickets and resetting krbtgt.
+  - Disabling PowerShell and logon scripts domain-wide.
+- Forced password resets for all user accounts.
+- Worked in parallel with the MSP to gather forensics, identify persistence,
+  and eradicate it carefully.
+- Verified backup integrity before even thinking about restore.
+- Restored servers into an isolated VLAN and only reintroduced them after:
+  - EDR scans.
+  - Log review.
+  - Sampled PHI integrity checks.
+- Used staged workstation reconnects instead of flipping the whole network
+  back at once.
+- Kept IoT offline until a long-term vendor/security plan could be put in
+  place.
+
+======================================================================
+8. LESSONS LEARNED & LONG-TERM IMPROVEMENTS
+-------------------------------------------
+
+1) Network Segmentation Must Match Reality, Not Just Diagrams
+   - IoT devices sharing space with PHI-bearing systems is a major risk.
+   - Future state: strict segmentation between IoT, clinical workstations,
+     servers, and admin systems, with tight ACLs between them.
+
+2) IoT and Network Devices Need Real Security Controls
+   - Default credentials are not acceptable in a PHI environment.
+   - Future state: enforce strong, unique credentials and hardening standards
+     for every switch, AP, camera, and clinical device.
+
+3) Phishing Defense Needs Both Technical and Human Layers
+   - Even a small clinic needs:
+     - URL rewriting and sandboxing.
+     - Attachment detonation where possible.
+     - Regular phishing simulations and awareness training.
+
+4) Privilege Management and Kerberos Hygiene Are Critical
+   - Minimizing the number of always-on privileged accounts reduces blast
+     radius.
+   - Having a playbook for Kerberos ticket purge and krbtgt reset is a
+     powerful containment tool.
+
+5) IR Playbooks Need to Explicitly Cover:
+   - When it’s acceptable to shut down VLANs.
+   - How to coordinate downtime clinical workflows with security triage.
+   - When and how to engage external IR teams and regulators.
+
+6) Backups Are Only Valuable If Tested and Isolated
+   - The only reason this story ends well is because backups were:
+     - Recent
+     - Tested
+     - Not infected
+   - Future state: regular backup restoration drills + ransomware anomaly
+     detection on backup repositories.
+
+7) Documentation and Communication Are Not Optional
+   - The Privacy Officer, Executive Director, and Clinical Lead all needed
+     constant updates.
+   - My timeline, evidence, and decisions form the backbone of HIPAA and
+     future SOC 2 proof.
+
+======================================================================
+9. HOW THIS MAPS TO SECURITY+ OBJECTIVES
+----------------------------------------
+
+This simulation exercise directly maps to multiple Security+ domains:
+
+- Attacks, Threats, and Vulnerabilities:
+  Phishing, ransomware, lateral movement, credential abuse, IoT compromise.
+
+- Architecture and Design:
+  Network segmentation (VLANs), IoT isolation, AD hardening, privileged
+  access controls.
+
+- Operations and Incident Response:
+  Full lifecycle:
+    - Preparation (MedLine IRP, policies)
+    - Identification (alerts, logs, user reports)
+    - Containment (isolation, VLAN shutdowns)
+    - Eradication (persistence removal, password resets)
+    - Recovery (restore from backup, staged reintegration)
+    - Lessons Learned (root cause, improvements)
+
+- Governance, Risk, and Compliance:
+  - HIPAA Security Rule and Breach Notification Rule.
+  - Evidence, chain of custody, regulatory notifications.
+  - Policy/practice alignment (IRP, VMW, BDR, VRM).
+
+======================================================================
+10. CONCLUSION
+--------------
+
+This wasn’t just a checklist-style IR scenario. I walked through the entire
+incident as if I were actually in the chair at 2 AM, making real trade-offs
+between clinical operations, patient safety, HIPAA compliance, and security
+best practices.
+
+The end result is a complete, realistic case study that I can point to as
+evidence that I understand:
+
+- How ransomware campaigns actually unfold in a healthcare context.
+- How to triage and contain a live attack under time pressure.
+- How to coordinate with leadership, privacy, compliance, and external
+  forensics.
+- How to recover safely and harden the environment so it doesn’t happen the
+  same way again.
+
+This is the kind of work I want to keep doing and eventually do professionally
+on live networks, not just simulations.
+
+======================================================================
+END OF DOCUMENT
+======================================================================

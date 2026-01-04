@@ -1,0 +1,296 @@
+
+MedLine Health Network
+Security Information and Event Management (SIEM) Incident Analysis Report
+
+Incident Title: Suspected Compromise of EHR Server and Attempted PHI Exfiltration
+Date of Analysis: 2 December 2025
+Analyst: Ibraheem Nashif (Student / Security+ Lab Project)
+Environment: MedLine – HIPAA-regulated urgent care & outpatient clinic network
+
+1. Executive Summary
+This report documents the analysis of a suspected security incident within MedLine’s environment based on correlated VPN, Wi‑Fi, Windows Security, web server, and firewall logs.
+
+Between 19:45 and 20:20 on 30 November 2025, MedLine experienced a multi‑stage intrusion attempt targeting its Electronic Health Records (EHR) infrastructure. An attacker conducted credential brute-force attempts against the user account “jdavis” over both Wi‑Fi and VPN, obtained valid credentials, and then used them to gain remote access to the network via VPN. After establishing access, the attacker moved laterally to the EHR server (EHR‑SRV01), abused a privileged service account (svc_ehr), cleared Windows audit logs, and accessed 550 patient records. The attacker then attempted to exfiltrate this data to an unknown external IP address over HTTPS.
+
+MedLine’s firewall successfully blocked outbound exfiltration attempts, and administrative response activity was observed shortly afterward, including changes to audit policy and the creation of a forensics read‑only account. Although the logs indicate that PHI was accessed and staged for export, the firewall controls appear to have prevented the data from leaving the environment.
+
+Overall incident severity is assessed as HIGH due to:
+• Credential compromise of an internal user.
+• Abuse of a privileged service account.
+• Clearing of security audit logs.
+• Large-scale unauthorized access to PHI (550 records).
+• Attempted exfiltration to an untrusted external host.
+
+2. Scope and Log Sources
+
+2.1 Systems in Scope
+• VPN Gateway – Provides remote access for staff.
+• Wi‑Fi Infrastructure – WPA2‑Enterprise (802.1X) network “MedLine‑Staff”.
+• EHR-SRV01 – Windows-based EHR application and database server hosting PHI.
+• Perimeter Firewall – Controls ingress/egress to the internet.
+• Web Application Server – Hosts the EHR web interface (/ehr/* endpoints).
+
+2.2 Log Sources Analyzed
+• vpn_gateway_log.csv
+  – Events: VPN_LOGIN (SUCCESS/FAIL), VPN_SESSION (STATUS/DISCONNECT).
+  – Purpose: Identify remote access attempts, lockouts, and suspicious connections.
+
+• wifi_auth_log.csv
+  – Events: AUTH (SUCCESS/FAIL) for MedLine‑Staff SSID.
+  – Purpose: Identify wireless authentication failures, possible brute-force attempts, and normal baselines.
+
+• ehr_windows_security_log.csv
+  – Events: 4624 (Logon), 4625 (Failed logon), 4672 (Special privileges), 1102 (Audit log cleared), 4663 (Object access), 4719 (Audit policy change), 4720 (User account created).
+  – Purpose: Identify interactive logons, privilege escalation, log tampering, PHI access, and incident response actions on EHR-SRV01.
+
+• webserver_access_log.log
+  – Apache-style HTTP access logs for /ehr/* endpoints.
+  – Purpose: Correlate EHR web sessions, login activity, patient data searches, and export requests.
+
+• firewall_log.csv
+  – Fields: src_ip, dst_ip, ports, action (ALLOW/BLOCK), rule name, byte counts.
+  – Purpose: Track internal DB access, outbound connections, and blocked exfiltration attempts.
+
+3. Incident Narrative and Timeline
+
+The incident unfolded in seven phases. All timestamps below are on 30 November 2025.
+
+Phase 1 – Initial Access Attempts (Credential Brute Force)
+19:45:10–19:46:05 (Wi‑Fi)
+• Multiple failed 802.1X Wi‑Fi authentication attempts for user “jdavis” to SSID “MedLine‑Staff”.
+• Failure reasons include “Wrong password” followed by “Account locked”.
+
+19:55:01–19:57:05 (VPN)
+• Multiple failed VPN_LOGIN attempts for “jdavis” from foreign IP 185.231.91.22.
+• Account lockout is triggered after repeated failures.
+
+Interpretation:
+The attacker is attempting password spraying or brute forcing “jdavis” across multiple authentication vectors (Wi‑Fi and VPN). The account is locked, confirming abnormal, high‑volume failures.
+
+Phase 2 – Credential Compromise and VPN Access
+20:11:03 (VPN)
+• VPN_LOGIN SUCCESS for “jdavis” from internal IP 10.8.32.4, despite earlier lockouts.
+
+Interpretation:
+After brute-force attempts, the attacker successfully authenticates as “jdavis” from an internal IP (10.8.32.4), suggesting credential compromise and/or pivoting via an already compromised internal host.
+
+Phase 3 – Lateral Movement to EHR Server
+20:10:59–20:12:14 (Windows Security – EHR-SRV01)
+• Event 4624: “jdavis” successfully logs into EHR-SRV01 from 10.8.32.4.
+• Event 4672: Special privileges assigned to service account “svc_ehr”.
+• Event 4624: “svc_ehr” logs on again, now with elevated privileges.
+
+Interpretation:
+The attacker uses the compromised “jdavis” account to access EHR-SRV01, then pivots into a privileged service account (“svc_ehr”), effectively achieving lateral movement and privilege escalation inside the MedLine network.
+
+Phase 4 – Anti‑Forensics (Audit Log Clearing)
+20:13:59 (Windows Security – EHR-SRV01)
+• Event 1102: “Audit log cleared” by “svc_ehr” from 10.8.32.4.
+
+Interpretation:
+Clearing the Windows security log is a classic anti‑forensics technique. Service accounts should not be clearing logs in normal operations. This is a high‑severity indicator of malicious activity and directly impacts MedLine’s ability to maintain HIPAA‑mandated audit trails.
+
+Phase 5 – Unauthorized PHI Access and Staging
+20:13:21–20:15:10 (Web + Windows Security)
+• Web logs show “jdavis” accessing /ehr/dashboard and performing patient search:
+  – /ehr/patient/search?last_name=smith
+• Web logs show an export request:
+  – /ehr/patient/export?count=550
+• Windows Security events:
+  – 4656: Handle requested for EHR DB object.
+  – 4663: Access to EHR_PATIENT_TABLE (read).
+  – 4663: Access to EHR_PATIENT_TABLE read (550 records).
+  – 4663: Access to EHR_EXPORT queue write.
+
+Interpretation:
+Shortly after log clearing, the attacker uses the EHR web application and service account to query and read 550 patient records, then stage them for export. This represents unauthorized access to PHI and a clear HIPAA impact.
+
+Phase 6 – Data Exfiltration Attempts (Blocked by Firewall)
+20:13:40–20:15:02 (Firewall Logs)
+• EHR client (10.8.32.4) accesses the DB server (10.8.0.20) over HTTPS (ALLOW_INTERNAL_HTTPS) with increasing byte counts, consistent with large DB queries.
+• 20:14:50–20:15:02:
+  – Multiple outbound HTTPS connections from 10.8.32.4 to external IP 91.214.201.77 are BLOCKED by rule BLOCK_EXTERNAL_UNK_DEST.
+
+Interpretation:
+After staging PHI data, the attacker attempts to exfiltrate it to an unknown external IP over HTTPS. MedLine’s firewall policy correctly identifies this as outbound traffic to an untrusted destination and blocks it. This likely prevented PHI from leaving the network.
+
+Phase 7 – Incident Response and Containment
+20:17:22–20:18:55 (Windows Security – EHR-SRV01)
+• Event 4624: “sysadmin” logs into EHR-SRV01 from 10.8.0.5.
+• Event 4719: Audit policy changed (by sysadmin).
+• Event 4720: New account “forensics_readonly” created.
+
+Interpretation:
+These events indicate administrative response: an administrator logs in, adjusts audit policy, and creates a read‑only forensics account, consistent with formal incident response, forensic investigation, and containment activities.
+
+4. Key Findings
+
+Finding 1: Credential Brute‑Force Attack Against User “jdavis”
+Evidence:
+• Wi‑Fi logs show repeated failed 802.1X authentication attempts for “jdavis”, resulting in account lockout.
+• VPN logs show multiple failed VPN_LOGIN attempts for “jdavis” from foreign IP 185.231.91.22, followed by lockout.
+
+Why it is significant:
+• High‑frequency authentication failures across two access vectors indicate a targeted brute‑force campaign.
+• Account lockouts confirm that the behavior is abnormal and likely malicious.
+
+Finding 2: Successful VPN Login from Anomalous Internal IP
+Evidence:
+• VPN_LOGIN SUCCESS for “jdavis” from 10.8.32.4 after prior foreign brute‑force activity and lockout.
+
+Why it is significant:
+• Suggests that the attacker obtained working credentials and either:
+  – Compromised an internal host, or
+  – Pivoted through an internal system to mask their origin.
+• Represents successful intrusion into MedLine’s internal network.
+
+Finding 3: Lateral Movement and Privilege Escalation via “svc_ehr”
+Evidence:
+• EHR-SRV01 logs show successful logon for “jdavis” from 10.8.32.4.
+• Service account “svc_ehr” logs on and receives special privileges (Event 4672).
+
+Why it is significant:
+• Represents lateral movement from VPN gateway to EHR-SRV01.
+• Service account abuse and privilege escalation are common attacker techniques to gain broader access while evading detection.
+
+Finding 4: Clearing of Windows Security Audit Log (Event 1102)
+Evidence:
+• EHR-SRV01 logs show Event 1102 “Audit log cleared” executed under “svc_ehr”.
+
+Why it is significant:
+• Clearing event logs is a strong indicator of anti‑forensics activity.
+• Directly undermines log integrity and conflicts with HIPAA requirements for audit logging and non‑repudiation.
+• Rarely, if ever, justified for a service account, increasing suspicion.
+
+Finding 5: Large‑Scale Unauthorized PHI Access (550 Records)
+Evidence:
+• Windows Security 4663 events for EHR_PATIENT_TABLE with “read (550 records)”.
+• Web server logs showing /ehr/patient/export?count=550 for user “jdavis”.
+
+Why it is significant:
+• Demonstrates bulk access to PHI beyond typical single‑patient lookup workflows.
+• Occurs immediately after privilege escalation and log clearing, indicating malicious intent rather than normal clinical use.
+
+Finding 6: Attempted PHI Exfiltration Blocked by Firewall
+Evidence:
+• Firewall logs show multiple blocked outbound HTTPS connections from 10.8.32.4 to external IP 91.214.201.77 shortly after the PHI export was staged.
+
+Why it is significant:
+• Indicates that the attacker attempted to exfiltrate PHI over an encrypted channel.
+• Confirms that MedLine’s outbound firewall rules functioned correctly and likely prevented data from leaving the environment.
+
+Finding 7: Effective Administrative Response and Forensic Preparation
+Evidence:
+• “sysadmin” logs into EHR-SRV01 after the suspicious activity.
+• Audit policy changes (4719) and creation of “forensics_readonly” (4720).
+
+Why it is significant:
+• Shows transition from attacker activity to formal incident response.
+• Establishes that MedLine began containment and evidence preservation steps consistent with incident response best practices.
+
+5. MITRE ATT&CK Technique Mapping
+
+The following MITRE ATT&CK techniques are observed or strongly suggested by log data:
+
+• T1110 – Brute Force
+  – Multiple failed authentication attempts against Wi‑Fi and VPN for user “jdavis”.
+
+• T1078 – Valid Accounts
+  – Successful VPN login and subsequent system logon using compromised credentials of “jdavis”.
+
+• T1548 – Abuse Elevation Control Mechanism (Privilege Escalation)
+  – Service account “svc_ehr” receives special privileges and is used interactively.
+
+• T1070.001 – Clear Windows Event Logs (Defense Evasion)
+  – Event ID 1102 (Audit log cleared) on EHR-SRV01 executed by “svc_ehr”.
+
+• T1530 – Data from Information Repositories (Collection)
+  – Large read operations against EHR_PATIENT_TABLE (550 records).
+
+• T1074 – Data Staged (Collection)
+  – EHR_EXPORT queue write events following data reads; export endpoint hit via web.
+
+• T1041 – Exfiltration Over Command and Control Channel
+  – Outbound HTTPS attempts from 10.8.32.4 to external IP 91.214.201.77 blocked by firewall.
+
+• T1090 – Proxy / Lateral Movement Infrastructure
+  – Use of internal IP 10.8.32.4 as a pivot point following external brute‑force attempts.
+
+6. Impact Assessment
+
+6.1 Data Impact
+• Number of Records Accessed: 550 distinct patient records accessed via EHR_PATIENT_TABLE.
+• Data Type: Protected Health Information (PHI); likely including names, visit details, and other clinical information (based on EHR context).
+• Data Exfiltration: Attempted, but outbound HTTPS traffic to unknown external IP 91.214.201.77 was blocked by the perimeter firewall. Logs do not show successful transfer of PHI outside the network.
+
+6.2 Regulatory and Compliance Impact
+• HIPAA:
+  – Access to PHI by an unauthorized actor constitutes a security incident.
+  – Bulk access of 550 PHI records raises the likelihood that this meets the definition of a breach, pending further forensics.
+  – Clearing of audit logs and abuse of service accounts undermine required audit controls and integrity of security monitoring.
+
+6.3 Operational Impact
+• Short‑term:
+  – Elevated alert state for EHR-SRV01.
+  – Potential temporary restrictions on the “jdavis” account and “svc_ehr” usage.
+  – Administrative time required for triage, forensics, and reporting.
+
+• Long‑term:
+  – Need for enhanced monitoring, re‑architecture of remote access controls, and stricter service account governance.
+  – Possible reputational and legal risk if PHI exposure is confirmed or must be reported.
+
+7. Recommendations
+
+The following recommendations are prioritized by severity and feasibility.
+
+7.1 Identity and Access Management (IAM)
+1) Enforce Multi‑Factor Authentication (MFA) for VPN Access
+   • Require MFA for all remote access to reduce the risk of credential‑based compromise.
+2) Strengthen Account Lockout Policies and Alerting
+   • Maintain conservative lockout thresholds.
+   • Generate SIEM alerts when multiple accounts enter lockout within a short period.
+3) Harden Service Account Usage
+   • Prohibit interactive logon for service accounts like “svc_ehr”.
+   • Restrict privileges to least privilege necessary for application operation.
+   • Regularly review and rotate service account credentials.
+
+7.2 Network and Perimeter Security
+4) Tighten Outbound Firewall Rules
+   • Continue to block outbound connections to unknown external IPs.
+   • Implement more granular egress controls (e.g., allow‑listing specific destinations).
+5) Implement Network Segmentation and Monitoring
+   • Ensure EHR-SRV01 and database servers are on tightly controlled segments.
+   • Monitor east‑west traffic, not just north‑south, for signs of lateral movement.
+6) Deploy Network IDS/IPS or Advanced Threat Detection
+   • Add signatures and behavioral analytics for brute force, unusual data transfers, and exfiltration patterns.
+
+7.3 Logging, Monitoring, and SIEM
+7) Protect and Centralize Logs
+   • Forward EHR-SRV01 logs (including Security, Application, and System logs) to a centralized, write‑once SIEM or log repository.
+   • Ensure local log clearing does not erase centrally stored copies.
+8) Add High‑Severity Alerts for Log Clearing
+   • Treat Event ID 1102 (Audit log cleared) as a critical alert within SIEM.
+   • Require immediate triage for any such events on production systems.
+9) Define and Test Correlated Use Cases
+   • Build SIEM rules that flag combinations such as:
+     – Multiple failed VPN/Wi‑Fi logins + lockout.
+     – Service account privilege escalation + log clearing.
+     – Large PHI queries + outbound connection attempts.
+
+7.4 Incident Response and Governance
+10) Formalize Incident Response Playbooks
+    • Document step‑by‑step actions for credential compromise, PHI access, and exfiltration attempts.
+    • Include communications, legal review, and HIPAA breach assessment procedures.
+11) Conduct Post‑Incident Review and Tabletop Exercises
+    • Review this incident with IT, security, and compliance stakeholders.
+    • Run tabletop simulations to ensure readiness and identify process gaps.
+12) Update HIPAA Security Risk Analysis
+    • Incorporate this incident into MedLine’s ongoing risk analysis.
+    • Re‑evaluate risk ratings for remote access, EHR servers, and logging controls.
+
+8. Conclusion
+
+The analyzed logs clearly depict a coordinated, multi‑stage attack against MedLine’s environment involving credential brute‑force attempts, compromise of a user account, lateral movement to an EHR server, abuse of a privileged service account, clearing of Windows security logs, bulk access to PHI, and attempted exfiltration of that data to an unknown external IP address. Although the attacker appears to have successfully accessed and staged 550 patient records, MedLine’s firewall controls likely prevented the data from leaving the network.
+
+This incident underscores the importance of strong remote access security, service account governance, centralized and protected log management, and a well‑defined incident response capability. Implementing the recommendations in this report will help MedLine reduce the likelihood of similar incidents in the future and improve its overall security posture and HIPAA compliance.
+

@@ -1,0 +1,525 @@
+
+MedLine Urgent Care
+Incident Response Plan (IRP)
+Version 1.0
+
+1. PURPOSE
+
+The purpose of this Incident Response Plan (IRP) is to define MedLine Urgent Care’s formal procedures for preparing for, detecting, analyzing, containing, eradicating, and recovering from cybersecurity incidents. This plan ensures that all security events—including PHI breaches, ransomware attacks, unauthorized access, medical device compromise, and network intrusions—are handled in a consistent, timely, and HIPAA-compliant manner.
+
+This IRP establishes the processes required to restore systems to normal operations, minimize patient care disruption, protect confidentiality, integrity, and availability of PHI, and ensure that MedLine learns from every incident to prevent recurrence. The goal is to safeguard clinical operations, maintain trust with patients, and reduce the likelihood and impact of future security incidents.
+
+
+2. SCOPE
+
+This Incident Response Plan applies to all MedLine Urgent Care workforce members—including employees, contractors, temporary staff, volunteers, and the outsourced IT support team—as well as all systems, networks, devices, and environments used to store, process, transmit, or access MedLine data.
+
+The scope includes, but is not limited to:
+
+- All clinical and administrative staff
+- All IT, Security, Compliance, and Privacy personnel
+- All vendors and third parties under Business Associate Agreements (BAAs)
+- On-premise systems, workstations, laptops, and mobile devices
+- EHR platforms, clinical applications, and supporting services
+- Medical devices and IoT equipment integrated with MedLine’s network
+- Network infrastructure including wired, wireless, and remote access solutions
+- Cloud environments, SaaS applications, and hosted platforms
+- Any system or asset containing or supporting Protected Health Information (PHI)
+- Any system whose compromise may impact MedLine’s operations or patient safety
+
+No user, system, or vendor with access to MedLine information is exempt from the requirements and responsibilities defined in this plan.
+
+
+3. DEFINITIONS
+
+Security Incident
+Any attempted or actual unauthorized access, use, disclosure, modification, or destruction of information; interference with system operations; or any event that threatens the confidentiality, integrity, or availability of MedLine systems or PHI.
+
+Breach
+The impermissible acquisition, access, use, or disclosure of PHI that compromises its security or privacy, as defined under the HIPAA Breach Notification Rule.
+
+PHI Breach
+A breach specifically involving Protected Health Information (PHI) that triggers HIPAA reporting requirements, including patient notification and possible OCR (Office for Civil Rights) reporting.
+
+Cybersecurity Event
+Any observable occurrence in a system or network, which may indicate a security incident or require investigation.
+
+Ransomware Attack
+Malicious software that encrypts systems or data until a ransom is paid. A ransomware infection involving PHI is presumed to be a breach unless proven otherwise through documentation and forensic analysis.
+
+Unauthorized Access
+Access to MedLine systems or data—especially PHI—by an individual or system without valid permission or legitimate business need.
+
+Indicators of Compromise (IOCs)
+Artifacts such as malicious IP addresses, file hashes, registry changes, abnormal logins, or behavioral anomalies that suggest a system may be compromised.
+
+Indicators of Attack (IOAs)
+Behavioral clues or patterns (e.g., privilege escalation attempts, credential stuffing, mass file modifications) that signal malicious activity in progress.
+
+Containment
+Immediate actions taken to isolate an incident, limit its spread, prevent further damage, and protect unaffected systems.
+
+Eradication
+Permanent removal of the root cause of the incident, including deleting malware, disabling compromised accounts, patching exploited vulnerabilities, or correcting misconfigurations.
+
+Recovery
+Restoration of affected systems, applications, and data to normal operations in a secure manner, with validation steps to ensure residual risks are addressed.
+
+Forensic Evidence
+Digital artifacts—logs, memory captures, disk images, screenshots—collected and preserved to support investigation, root-cause analysis, or legal requirements.
+
+Chain of Custody
+A documented timeline showing the collection, handling, transfer, and storage of evidence to ensure integrity and admissibility.
+
+Incident Response Team (IRT)
+MedLine’s group responsible for coordinating and executing response actions during an incident. Includes Security, IT, Compliance, Privacy, Clinical Leads, and Executive Leadership as needed.
+
+Severity Levels
+Classification system used to determine the urgency of response actions:
+- Low – Minimal impact
+- Moderate – Limited operational or PHI exposure
+- High – Significant disruption or high-risk PHI exposure
+- Critical – Ransomware, confirmed PHI breach, major system compromise
+
+Event Log
+Recorded information about system activity used to detect, investigate, and verify incidents.
+
+Compensating Controls
+Security safeguards designed to reduce risk when primary controls fail or when immediate remediation is not possible.
+
+Business Associate (BA)
+A vendor or third party with access to PHI who must comply with HIPAA under a Business Associate Agreement (BAA).
+
+Incident Ticket
+A documented record of an incident in MedLine’s tracking system, containing timeline, actions taken, evidence, and final resolution.
+
+
+4. ROLES & RESPONSIBILITIES (IR TEAM)
+
+The following roles make up MedLine Urgent Care’s Incident Response Team (IRT). Each role is responsible for executing specific actions before, during, and after a security incident to ensure rapid containment, regulatory compliance, and safe restoration of clinical operations.
+
+4.1 Security Team (Internal or Contracted)
+- Lead the technical investigation of security incidents
+- Validate alerts, analyze indicators of compromise (IOCs), and determine severity
+- Coordinate containment, eradication, and recovery steps
+- Perform forensic data collection and ensure chain of custody
+- Correlate logs, SIEM alerts, endpoint telemetry, and network activity
+- Notify Privacy and Compliance when PHI may be affected
+- Document all IR activities in the incident ticket
+- Provide technical leadership during high-severity and PHI-impacting events
+
+4.2 IT Operations / Infrastructure Team
+- Execute containment actions (disconnect network segments, isolate endpoints, block traffic)
+- Apply patches, configuration changes, or system rebuilds during eradication
+- Coordinate downtime windows and communicate disruptions to department leads
+- Validate system functionality after restoration
+- Support forensic evidence collection (disk images, log exports)
+- Escalate issues that require vendor support
+
+4.3 Outsourced IT Vendor
+- Assist Security and IT with technical support, patching, and remediation
+- Escalate issues requiring third-party intervention
+- Provide after-hours or emergency response support
+- Suppress or shut down compromised services at direction of Security
+- Follow strict HIPAA, BAA, and evidence-handling requirements
+
+4.4 Clinical IT / EHR Support Team
+- Identify incidents or anomalies involving the EHR or clinical systems
+- Coordinate with the EHR vendor for emergency patches or mitigation steps
+- Communicate downtime procedures to clinical staff
+- Ensure continuity of care workflows during EHR outages
+- Validate data integrity during recovery
+- Report suspected PHI compromise immediately to Security & Privacy
+
+4.5 Privacy Officer
+- Lead PHI breach assessments under HIPAA
+- Determine whether the incident meets the definition of a notifiable breach
+- Coordinate patient notifications, OCR reporting, and documentation
+- Work with Legal and Compliance to ensure regulatory obligations are met
+- Maintain all PHI-related breach records
+- Participate in root-cause and post-incident reviews
+
+4.6 Compliance Officer
+- Ensure all IR actions comply with HIPAA Security Rule §164.308(a)(6)
+- Maintain IR policies, procedures, and documentation
+- Review all high-severity incidents for regulatory or audit impact
+- Provide evidence during third-party audits (SOC 2, HIPAA, insurance carriers)
+- Work with Leadership to address control gaps identified during IR
+
+4.7 Human Resources (HR)
+- Support investigations involving insider threats, employee misconduct, or unauthorized access
+- Coordinate communication and corrective actions for personnel-related incidents
+- Assist with employee interviews and documentation
+- Enforce disciplinary actions if MedLine policies are violated
+
+4.8 Legal Counsel
+- Advise on regulatory and legal implications of incidents
+- Guide decisions on breach notifications, law enforcement involvement, and liability
+- Review external communications to ensure legal compliance
+- Preserve privilege during sensitive investigations (ransomware, insider threats)
+
+4.9 Executive Leadership
+- Declare high-severity or critical incidents
+- Allocate resources for containment, recovery, or forensic services
+- Approve communication with media, partners, and law enforcement
+- Provide final approval for breach notifications and risk acceptance
+- Ensure business continuity strategies are followed
+
+4.10 Communications / Public Relations
+- Prepare internal and external statements under guidance from Security, Privacy, and Legal
+- Manage communication with patients, partners, or press during public-facing incidents
+- Ensure messaging is consistent, compliant, and reduces panic
+- Communicate operational impacts to staff and stakeholders
+
+4.11 Third-Party Vendors (Including EHR, Cloud, Medical Devices)
+- Provide emergency support during incidents related to their platforms
+- Apply patches, hotfixes, or configuration changes to vendor-managed systems
+- Cooperate with forensic investigations in accordance with BAA terms
+- Notify MedLine immediately of relevant security advisories or breaches
+- Provide logs, evidence, or artifacts as needed
+
+4.12 Incident Response Coordinator (Assigned Per Incident)
+- Track timelines, actions, roles, and escalation points
+- Maintain communication channels during the incident
+- Ensure documentation is complete and accurate
+- Facilitate Lessons Learned sessions and post-incident reporting
+
+
+5. INCIDENT CLASSIFICATION LEVELS
+
+MedLine uses a multi-tier severity model to classify incidents and determine response requirements.
+
+Low Severity
+Definition:
+- No PHI involved
+- Minor IT issue
+- Minimal operational impact
+- No confirmed security compromise
+- System backlog, small glitches, misconfigurations
+
+Moderate Severity
+Definition:
+- Limited impact
+- No confirmed PHI exposure
+- Localized operational issues, often network-related
+- Possible indicators of compromise that require investigation
+
+High Severity
+Definition:
+- Potential PHI exposure
+- Significant network or system impact
+- High risk of escalation
+- Evidence or strong suspicion of attacker activity
+
+Critical Severity
+Definition:
+- Confirmed PHI breach
+- Ransomware attack
+- Major system compromise
+- Severe impact to clinical operations, patient safety, or regulatory compliance
+
+
+6. INCIDENT RESPONSE WORKFLOW (LIFECYCLE)
+
+MedLine follows a six-phase incident response lifecycle aligned with NIST 800-61 and HIPAA Security Rule §164.308(a)(6).
+
+Phase 1 — Preparation
+- Maintain updated IR policies, playbooks, and contact lists
+- Train staff to spot and report suspicious activity
+- Ensure Security and IT have access to SIEM, EDR, log management, scanners, and forensic tools
+- Maintain current system baselines and backups
+- Ensure BAAs and vendor contacts are current
+- Conduct regular tabletop exercises
+- Maintain monitoring on all PHI systems
+
+Phase 2 — Identification
+- Detect and validate potential incidents via alerts, logs, and reports
+- Triage and determine whether a true incident has occurred
+- Open an incident ticket and record key facts
+- Perform initial classification of severity (Low/Moderate/High/Critical)
+- Notify appropriate stakeholders
+
+Phase 3 — Containment
+- Short-Term: isolate compromised systems, disable accounts, block malicious traffic
+- Long-Term: apply segmentation, temporary firewall rules, access restrictions
+- Preserve forensic evidence while preventing further spread
+- Work with vendors when necessary to isolate cloud or EHR systems
+
+Phase 4 — Eradication
+- Remove malware, malicious scripts, or unauthorized software
+- Patch exploited vulnerabilities and correct misconfigurations
+- Remove unauthorized accounts or backdoors
+- Reimage systems when required
+- Validate that no attacker persistence remains
+
+Phase 5 — Recovery
+- Restore systems from clean backups
+- Validate data integrity and PHI completeness
+- Reintroduce systems to the network in a controlled manner
+- Monitor closely for signs of reinfection or anomalous activity
+- Coordinate with clinical departments to ensure safe resumption of services
+
+Phase 6 — Lessons Learned
+- Conduct a post-incident review within a defined timeframe
+- Document root cause, impact, and control gaps
+- Update policies, controls, and training based on findings
+- Record improvements in the risk register
+- Ensure MedLine is better prepared for future incidents
+
+
+7. COMMUNICATIONS PLAN
+
+MedLine maintains a strictly controlled communications structure during cybersecurity incidents to prevent misinformation, protect PHI, preserve legal requirements, and ensure HIPAA-compliant notifications. Only authorized personnel may communicate internally or externally regarding active incidents.
+
+7.1 Authorized Communicators
+Only the following may communicate about an incident:
+- Incident Response Coordinator
+- Security Lead
+- Privacy Officer
+- Compliance Officer
+- Executive Leadership
+- Legal Counsel
+- Communications/PR Team (with legal approval)
+
+7.2 Internal Communications
+- Must be factual, minimal, and need-to-know only
+- Focus on operational impacts rather than technical speculation
+- Disseminated via approved channels
+- Unauthorized internal speculation or rumor-sharing is prohibited
+
+7.3 External Communications
+- Only Executive Leadership, Legal Counsel, Privacy Officer, or designated PR may communicate with patients, partners, media, regulators, or the public
+- All external messaging must be reviewed by Legal and approved by Executive Leadership
+- No employee may independently communicate about the incident externally
+
+7.4 PHI Breach Notifications (HIPAA)
+- Privacy Officer determines whether an incident constitutes a reportable breach
+- If reportable, MedLine notifies affected individuals, HHS OCR, and media (if required)
+- Notifications are drafted under Legal supervision and delivered within HIPAA timelines
+
+7.5 Vendor and Third-Party Communications
+- Managed by Security Lead, IT Lead, Privacy Officer, or Legal
+- Only necessary technical information is shared
+- No PHI is disclosed unless permitted by the BAA
+- All vendor communications are logged within the incident ticket
+
+7.6 Law Enforcement Communications
+- Only Executive Leadership or Legal Counsel may contact law enforcement, FBI, or CISA
+- Staff must not engage with law enforcement independently
+
+7.7 Staff Instructions
+- Staff must not discuss the incident with unauthorized parties
+- Staff must not share incident information via email, text, or messaging apps
+- All questions must be directed to Security, Privacy, or Management
+- Failure to follow communication rules may result in disciplinary action
+
+7.8 Communication Logging
+- All incident-related communications—internal and external—must be logged, including:
+  - Date and time
+  - Sender and recipient
+  - Summary of content
+  - Method of communication
+  - Authorization details
+
+
+8. DOCUMENTATION REQUIREMENTS
+
+MedLine requires comprehensive, precise, and legally defensible documentation for every security incident.
+
+8.1 Required Artifacts
+- Initial Incident Report
+- Detailed Incident Timeline
+- Evidence Collection Package (logs, screenshots, images, memory dumps, samples)
+- Chain of Custody Forms
+- Technical Analysis Summary
+- Decision-Making Log
+- Communications Log
+- PHI Impact Assessment & HIPAA Breach Analysis
+- Corrective Actions & Lessons Learned
+- Final Incident Report
+
+8.2 Documentation Standards
+- All entries must be timestamped
+- No deletion or alteration of original evidence
+- PHI must be redacted when not necessary for analysis
+- All documents stored in secure, access-controlled repositories
+- Retention for a minimum of 6 years, in line with HIPAA
+
+8.3 Incident Ticket Requirements
+Each incident ticket must contain:
+- Summary and severity level
+- Assigned team members
+- Status and phase tracking
+- Links to evidence, communications, analysis, and reports
+- Closure sign-off by Security, Privacy, and Leadership
+
+8.4 Documentation Auditing
+- Privacy Officer and Security Lead review documentation
+- Compliance conducts periodic quality checks
+- Documentation practices are tested annually for audit readiness
+
+
+9. INCIDENT COMMAND STRUCTURE & AUTHORITY
+
+MedLine executes incident response with a clear chain of command.
+
+9.1 Command Structure Overview
+- Executive Leadership: ultimate strategic authority
+- Incident Response Coordinator (IRC): operational commander
+- Security Lead / IT Director: technical commander
+- Privacy Officer & Legal Counsel: regulatory and legal authority
+- Specialized Units: Forensics, Vendor Liaison, Communications
+
+9.2 Role Authority (Summary)
+- Executive Leadership: approves shutdowns, public disclosures, breach notifications
+- IRC: directs all response activities and team members
+- Technical Commander: controls all technical actions and system changes
+- Privacy Officer: leads HIPAA breach assessments and PHI-related decisions
+- Legal Counsel: oversees regulatory and legal exposure
+- General Staff: execute instructions; do not act independently
+- Outsourced IT: follow MedLine chain of command with no independent authority
+
+
+10. INCIDENT SEVERITY LEVELS & RESPONSE ACTIONS
+
+MedLine uses three primary operational severity levels based on prior definitions.
+
+10.1 Low Severity
+Definition:
+- No PHI impact
+- Minor IT issue (e.g., system backlog)
+- No confirmed compromise
+
+Response:
+- Handled by IT with basic troubleshooting
+- Logged and monitored
+- Escalated if patterns or suspicious behavior emerge
+
+10.2 Moderate Severity
+Definition:
+- Small impact, no confirmed PHI exposure
+- Localized networking or system issues
+- Possible indicators of compromise requiring deeper review
+
+Response:
+- Incident Response Coordinator and Technical Commander involved
+- Logs collected and analyzed
+- Affected departments notified of operational impacts
+- Escalated to High if PHI risk or attacker activity is discovered
+
+10.3 High Severity
+Definition:
+- Potential or confirmed PHI exposure
+- Major network issue or widespread impact
+- Evidence or strong suspicion of attacker presence
+
+Response:
+- Full IR Team activation
+- Immediate containment and isolation
+- Forensic evidence preservation
+- HIPAA breach analysis initiated
+- Law enforcement or regulators contacted where appropriate
+
+
+11. INCIDENT RESPONSE PROCEDURES (PHASED)
+
+MedLine follows a phased, repeatable set of procedures.
+
+11.1 Phase 1 — Detection & Identification
+- Receive alerts or reports
+- Validate an incident has occurred
+- Open incident ticket and record initial details
+
+11.2 Phase 2 — Analysis & Classification
+- Collect logs and evidence
+- Identify IOCs and evaluate scope
+- Determine PHI exposure likelihood
+- Confirm severity level
+
+11.3 Phase 3 — Containment
+- Isolate affected devices and accounts
+- Apply short-term and long-term containment measures
+- Preserve evidence integrity
+
+11.4 Phase 4 — Eradication
+- Remove malicious artifacts and unauthorized changes
+- Patch exploited vulnerabilities
+- Eliminate attacker persistence
+
+11.5 Phase 5 — Recovery
+- Restore from secure backups
+- Validate system and data integrity
+- Reintroduce systems to production
+- Monitor for residual risk
+
+11.6 Phase 6 — Post-Incident Review
+- Conduct formal Lessons Learned session
+- Identify root cause and systemic issues
+- Implement improvements and corrective actions
+- Update documentation and training
+
+
+12. POST-INCIDENT REPORT & PERFORMANCE METRICS
+
+MedLine creates a Final Incident Report (FIR) for each incident and tracks detailed performance metrics.
+
+12.1 Final Incident Report Components
+- Executive Summary
+- Detailed Timeline
+- Scope of Impact
+- Root Cause Analysis
+- Containment & Eradication Summary
+- Recovery Actions
+- HIPAA Breach Analysis
+- Lessons Learned
+- Corrective Action Plan
+- Appendices (logs, screenshots, chain of custody, communications)
+
+12.2 Key Performance Metrics (Samples)
+- Mean Time to Detect (MTTD)
+- Mean Time to Acknowledge (MTTA)
+- Mean Time to Contain (MTTC)
+- Mean Time to Eradicate (MTTE)
+- Mean Time to Recover (MTTR)
+- Number of incidents involving PHI
+- Encryption compliance rate for PHI
+- Vulnerability remediation SLA compliance
+- Phishing failure rate
+- IR training completion rate
+- Documentation completeness score
+- HIPAA notification timeliness
+
+12.3 Executive Dashboard
+- Quarterly summary to Leadership covering:
+  - Major incidents
+  - Performance vs SLAs
+  - PHI-related events
+  - Training progress
+  - Open risks and corrective actions
+
+
+13. PLAN MAINTENANCE, TESTING & VERSION CONTROL
+
+13.1 Plan Review
+- Formal review at least annually
+- Additional reviews after major incidents, system changes, or regulatory updates
+- Reviews documented with date, attendees, and outcomes
+
+13.2 Testing
+- At least one annual tabletop exercise
+- Periodic technical tests of backups, logging, EDR, and network controls
+- Annual HIPAA breach notification drill
+
+13.3 Version Control
+- Incident Response Coordinator owns the plan
+- Updates approved by Security, Privacy, Legal, and Leadership
+- Each version includes version number, date, summary of changes, and approvers
+- Prior versions retained for at least 6 years
+
+13.4 Continuous Improvement
+MedLine commits to continuous improvement of its incident response capability by incorporating:
+- New threat intelligence
+- Lessons from incidents and exercises
+- Regulatory changes
+- Auditor and assessor recommendations
+- Advances in healthcare security best practices
