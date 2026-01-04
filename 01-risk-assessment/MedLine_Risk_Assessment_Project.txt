@@ -1,0 +1,156 @@
+===============================================
+        MEDLINE URGENT CARE CLINIC
+        RISK ASSESSMENT REPORT 
+===============================================
+------------------------------------------------
+1. EXECUTIVE SUMMARY
+------------------------------------------------
+MedLine Urgent Care Clinic faces significant cybersecurity,
+operational, and HIPAA compliance risks. Five HIGH-risk
+findings were identified that require immediate attention.
+These risks affect PHI confidentiality, patient safety,
+operational continuity, and regulatory compliance.
+
+------------------------------------------------
+2. SCOPE & METHODOLOGY
+------------------------------------------------
+Scope Includes:
+- IT systems, cloud services, IoT medical devices
+- Personnel & human factors
+- Physical security
+- Administrative processes
+- Third-party vendors
+
+Methodology:
+- Asset Identification
+- Threat Identification
+- Vulnerability Analysis
+- HIPAA Qualitative Risk Scoring (Low/Moderate/High)
+- Final Risk Register
+- Recommended Mitigations
+
+------------------------------------------------
+3. ASSET INVENTORY
+------------------------------------------------
+Information Assets:
+- Patient PHI
+- Billing & Insurance Data
+- Lab Results & Diagnostics
+- Employee HR Records
+- Patient Payment Info
+
+Technical Assets:
+- Cloud EHR System
+- Local File Server
+- Laptops & Workstations
+- Medical IoT Devices
+- Clinic Wi-Fi (Staff + Guest)
+- Microsoft 365 Environment
+
+Physical Assets:
+- Clinic Building
+- Exam Rooms
+- Filing Cabinets (Paper PHI)
+- Server Closet
+- Network Hardware
+
+Personnel Assets:
+- Doctors, Nurses, Medical Assistants
+- Receptionists
+- Cleaning Staff
+- Clinic Manager / Security Officer
+
+------------------------------------------------
+4. THREAT REGISTER (SUMMARY)
+------------------------------------------------
+Key Threats:
+- Phishing & Social Engineering
+- Ransomware Attacks
+- MITM Attacks on Wi-Fi
+- Unauthorized Access
+- Vendor Breaches
+- System Outages
+- Insider Misuse
+- Physical Theft
+
+------------------------------------------------
+5. VULNERABILITY REGISTER (SUMMARY)
+------------------------------------------------
+Major Vulnerabilities:
+- Outdated policies & no risk register
+- Weak IAM & no MFA
+- Outdated firewalls & unpatched servers
+- Flat network architecture
+- No disk encryption
+- Minimal logging & no alerting
+- Weak physical access controls
+- Outdated & untested backups
+- No vendor risk assessments
+- Lack of security training
+
+------------------------------------------------
+6. HIPAA QUALITATIVE RISK MATRIX
+------------------------------------------------
+Likelihood: Low / Moderate / High
+Impact:    Low / Moderate / High
+
+Matrix:
+           |  Low Impact | Moderate Impact | High Impact
+---------------------------------------------------------
+Low        |    LOW     |      LOW        |  MODERATE
+Moderate   |    LOW     |   MODERATE      |   HIGH
+High       |  MODERATE  |      HIGH       |    HIGH
+
+------------------------------------------------
+7. FINAL RISK REGISTER (HIGH PRIORITY RISKS)
+------------------------------------------------
+1. Social Engineering + No Training
+   Likelihood: Moderate
+   Impact: High
+   FINAL RISK: HIGH
+
+2. MITM Attack via Improper Wi-Fi Segmentation
+   Likelihood: High
+   Impact: High
+   FINAL RISK: HIGH
+
+3. Ransomware + Outdated Firewalls
+   Likelihood: Moderate
+   Impact: High
+   FINAL RISK: HIGH
+
+4. Backup Failure + Outdated Backups
+   Likelihood: High
+   Impact: High
+   FINAL RISK: HIGH
+
+5. IoT Devices on Flat Network
+   Likelihood: High
+   Impact: High
+   FINAL RISK: HIGH
+
+------------------------------------------------
+8. MITIGATION RECOMMENDATIONS
+------------------------------------------------
+High-Priority Controls:
+- Enforce MFA for all systems
+- Implement mandatory phishing/security training
+- Replace outdated firewall hardware; update firmware
+- Segment network (IoT VLAN, Staff VLAN, Guest VLAN)
+- Enable full disk encryption on all endpoints
+- Test backups quarterly; reduce RPO to daily/weekly
+- Establish vendor risk management workflow + BAAs
+- Deploy endpoint protection/EDR
+
+------------------------------------------------
+9. CONCLUSION
+------------------------------------------------
+MedLine Urgent Care Clinic must address critical risks
+related to PHI exposure, outdated systems, lack of training,
+and weak network architecture. Implementing the recommended
+controls will significantly reduce regulatory, operational,
+and cybersecurity risks while improving overall resilience.
+
+===============================================
+            END OF REPORT
+===============================================
